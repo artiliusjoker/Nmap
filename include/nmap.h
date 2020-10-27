@@ -21,17 +21,22 @@
 #include "constants.h"
 #include "mystring.h"
 
-// Define the Ping Loop 
-int pingloop=1; 
-  
-  
 // ping packet structure 
 struct ping_pkt 
 { 
     struct icmphdr hdr; 
     char msg[PING_PKT_S-sizeof(struct icmphdr)]; 
-}; 
+};
+
 // Function declarations
+
+// Resolve hostnames from IP addresses
+void DnsLookUp(char *, struct sockaddr_in *, char **);
+
+// Resolve IP addresses from hostnames
+char *DnsReverseLookup(char *);
+
+
 unsigned short checksum(void *b, int len);
 void intHandler(int dummy);
 char *dns_lookup(char *addr_host, struct sockaddr_in *addr_con);

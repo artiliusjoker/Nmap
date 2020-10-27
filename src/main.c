@@ -3,50 +3,18 @@
 int main(int argc, char *argv[])
 {
     if(argc != 2){
-        fprintf(stderr,"Enter 2 arguments only. \"StudentID Network/SubnetMask\"\n");
+        fprintf(stderr,"Enter 2 arguments only. \"StudentID Network/inputSubnetMask\"\n");
         exit(0);
     }
-    char *netAddr = GetInfoFromStr(argv[1], NETWORK_ADDR);
-    char *subnetMask = GetInfoFromStr(argv[1], SUBNET_MASK);
+    char *inputAddress = GetInfoFromStr(argv[1], NETWORK_ADDR);
+    char *inputSubnetMask = GetInfoFromStr(argv[1], SUBNET_MASK);
+    char *resolvedHostName;
+    struct sockaddr_in sockAddr_in; 
 
-    int sockfd; 
-    char *ip_addr, *reverse_hostname; 
-    struct sockaddr_in addr_con; 
-    int addrlen = sizeof(addr_con); 
-    char net_buf[NI_MAXHOST]; 
-   
-    ip_addr = dns_lookup(netAddr, &addr_con); 
-    if(ip_addr==NULL) 
-    { 
-        printf("\nDNS lookup failed! Could  \
-                   not resolve hostname!\n"); 
-        return 0; 
-    } 
-  
-    reverse_hostname = reverse_dns_lookup(ip_addr); 
-    printf("\nTrying to connect to '%s' IP: %s\n", 
-                                       argv[1], ip_addr); 
-    printf("\nReverse Lookup domain: %s",  
-                           reverse_hostname); 
-  
-    //socket() 
-    sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); 
-    if(sockfd<0) 
-    { 
-        printf("\nSocket file descriptor not received!!\n"); 
-        return 0; 
-    } 
-    else
-        printf("\nSocket file descriptor %d received\n", sockfd); 
-  
-    signal(SIGINT, intHandler);//catching interrupt 
-  
-    //send pings continuously 
-    send_ping(sockfd, &addr_con, reverse_hostname,  
-                                 ip_addr, argv[1]); 
+    DnsLookUp(inputAddress, &sockAddr_in, &resolvedHostName);
 
-    FreeString(netAddr);
-    FreeString(subnetMask);
+    FreeString(inputAddress);
+    FreeString(inputSubnetMask);
     return 1;
 }
 
@@ -70,7 +38,7 @@ unsigned short checksum(void *b, int len)
 // Interrupt handler 
 void intHandler(int dummy) 
 { 
-    pingloop=0; 
+    //pingloop=0; 
 } 
   
 // Performs a DNS lookup  
@@ -159,7 +127,7 @@ void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr,
                    (const char*)&tv_out, sizeof tv_out); 
   
     // send icmp packet in an infinite loop 
-    while(pingloop) 
+    while(True) 
     { 
         // flag is whether packet was sent or not 
         flag=1; 
