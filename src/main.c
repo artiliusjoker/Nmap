@@ -8,10 +8,10 @@ int main(int argc, char *argv[])
     }
     char *inputAddress = GetInfoFromStr(argv[1], NETWORK_ADDR);
     char *inputSubnetMask = GetInfoFromStr(argv[1], SUBNET_MASK);
-    char *resolvedHostName;
+    char *resolved;
     struct sockaddr_in sockAddr_in; 
 
-    DnsLookUp(inputAddress, &sockAddr_in, &resolvedHostName);
+    DnsLookUp(inputAddress, &sockAddr_in, &resolved);
 
     FreeString(inputAddress);
     FreeString(inputSubnetMask);

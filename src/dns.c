@@ -2,11 +2,12 @@
 
 // References
 // https://www.geeksforgeeks.org/ping-in-c/
-void DnsLookUp(char * ipAddress, struct sockaddr_in * socketAddrIn, char **hostName){
+// Resolve hostnames from IP addresses
+void DnsLookUp(char * hostName, struct sockaddr_in * socketAddrIn, char **resultIpAddress){
     memset(socketAddrIn, 0, sizeof(struct sockaddr_in));
     struct hostent *hostEntity; 
     
-    if ((hostEntity = gethostbyname(ipAddress)) == NULL) 
+    if ((hostEntity = gethostbyname(hostName)) == NULL) 
     { 
         perror("Error in DNS lookup !");
         exit(EXIT_FAILURE);
@@ -16,13 +17,14 @@ void DnsLookUp(char * ipAddress, struct sockaddr_in * socketAddrIn, char **hostN
     (*socketAddrIn).sin_port = htons (PORT_NO); 
     (*socketAddrIn).sin_addr.s_addr  = *(long*)hostEntity->h_addr;
 
-    // Result hostname
-    *hostName = (char *) malloc (sizeof(char) * NI_MAXHOST);
-    strcpy(*hostName, inet_ntoa(*(struct in_addr *)hostEntity->h_addr)); 
+    // Result resultIpAddress
+    *resultIpAddress = (char *) malloc (sizeof(char) * NI_MAXHOST);
+    strcpy(*resultIpAddress, inet_ntoa(*(struct in_addr *)hostEntity->h_addr)); 
 }
 
 // References
 // https://www.geeksforgeeks.org/ping-in-c/
+// Resolve IP addresses from hostnames
 char *DnsReverseLookup(char * hostName){
     char * resultIp;
     return resultIp;
