@@ -36,6 +36,14 @@ void DnsLookUp(char *, struct sockaddr_in *, char **);
 // Resolve IP addresses from hostnames
 char *DnsReverseLookup(char *);
 
+// Change host IP to network address
+void ToNetworkAddress(char **);
+
+// Get addresses pool from net address and subnet mask
+char ** GetAdressPool(uint32_t , uint32_t );
+
+// Subnet mask (char *) to unit32_t
+uint32_t SubnetMaskToUint32_t(char *);
 
 unsigned short checksum(void *b, int len);
 void intHandler(int dummy);

@@ -13,6 +13,11 @@ int main(int argc, char *argv[])
 
     DnsLookUp(inputAddress, &sockAddr_in, &resolved);
 
+    uint32_t networkLong = htonl(sockAddr_in.sin_addr.s_addr);
+    uint32_t netmaskLong = SubnetMaskToUint32_t(inputSubnetMask);
+    //fprintf(stdout, "%i \n", htonl(sockAddr_in.sin_addr.s_addr));
+    //fprintf(stdout, "%i \n", SubnetMaskToUint32_t(inputSubnetMask));
+    GetAdressPool(networkLong, netmaskLong);
     FreeString(inputAddress);
     FreeString(inputSubnetMask);
     return 1;

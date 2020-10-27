@@ -18,6 +18,9 @@
 // Type of address
 #define NETWORK_ADDR 1
 #define SUBNET_MASK 2
+// Address size
+#define IPV4_ADDR_SIZE 16
+
 // Enum boolean implemented
 typedef enum { False, True } boolean; 
 
