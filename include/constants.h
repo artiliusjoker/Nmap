@@ -1,6 +1,7 @@
 // Define constants and enum used in this project
 #ifndef constants
 #define constants
+
 // Define the Packet Constants 
 // ping packet size 
 #define PING_PKT_S 64 
@@ -23,5 +24,8 @@
 
 // Enum boolean implemented
 typedef enum { False, True } boolean; 
+
+// Max threads
+#define MAX_THREAD_POOL_SIZE 32
 
 #endif

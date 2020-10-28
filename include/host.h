@@ -1,8 +1,7 @@
-#ifndef icmp
-#define icmp
+#ifndef host
+#define host
 
 #include "nmap.h"
-
 
 
 #endif

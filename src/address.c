@@ -1,5 +1,7 @@
 #include "../include/nmap.h"
+int hostsSize;
 
+// Converts /XX (char*) to network byte order in uint32_t
 uint32_t SubnetMaskToUint32_t(char * subnetMask){
     uint32_t result = 0;
     int sm = atoi(subnetMask);
@@ -35,13 +37,15 @@ char **GetAdressPool(uint32_t ipAddress, uint32_t subnetMask)
 
     // Use AND bitwise operator to get the real network address (in case wrong input)
     uint32_t network = ipAddress & subnetMask;
+    int hostCount = 0;
 
     // Calculate all host addresses in the range
-    for (unsigned i = hoststart; i <= hostend; i++)
+    for (unsigned i = hoststart; i < hostend; i++)
     {
         uint32_t hostIp;
         int octet1, octet2, octet3, octet4;
         char newHost[IPV4_ADDR_SIZE];
+        __host__ *new = NULL;
 
         hostIp = network + i;
         octet1 = (hostIp & 0xff000000) >> 24;
@@ -49,7 +53,13 @@ char **GetAdressPool(uint32_t ipAddress, uint32_t subnetMask)
         octet3 = (hostIp & 0x0000ff00) >> 8;
         octet4 = (hostIp & 0x000000ff);
         snprintf(newHost, sizeof(newHost), "%d.%d.%d.%d", octet1, octet2, octet3, octet4);
-        printf("%s\n", newHost);
+
+        // Create new host base on IP address
+        new = NewHost(newHost);
+        // Add to linked list
+        AddHost(&head, new);
+        ++ hostCount;
     }
+    hostsSize = hostCount;
     return NULL;
 }

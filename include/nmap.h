@@ -21,36 +21,54 @@
 #include "constants.h"
 #include "mystring.h"
 
-// ping packet structure 
-struct ping_pkt 
-{ 
-    struct icmphdr hdr; 
-    char msg[PING_PKT_S-sizeof(struct icmphdr)]; 
-};
-
-// Function declarations
-
+// Other functions
 // Resolve hostnames from IP addresses
-void DnsLookUp(char *, struct sockaddr_in *, char **);
-
+struct sockaddr_in *DnsLookUp(char *, char **);
 // Resolve IP addresses from hostnames
 char *DnsReverseLookup(char *);
-
-// Change host IP to network address
-void ToNetworkAddress(char **);
-
 // Get addresses pool from net address and subnet mask
 char ** GetAdressPool(uint32_t , uint32_t );
-
-// Subnet mask (char *) to unit32_t
+/*  
+    Subnet mask (char *) to unit32_t 
+    Converts /XX (char*) to network byte order in uint32_t 
+*/
 uint32_t SubnetMaskToUint32_t(char *);
 
-unsigned short checksum(void *b, int len);
-void intHandler(int dummy);
-char *dns_lookup(char *addr_host, struct sockaddr_in *addr_con);
-char* reverse_dns_lookup(char *ip_addr);
-void send_ping(int ping_sockfd, struct sockaddr_in *ping_addr, 
-            char *ping_dom, char *ping_ip, char *rev_host);
+/* 
+    Function and structs to define a host
 
+*/
+// Each host is a struct
+typedef struct host
+{
+    struct sockaddr_in *hostAddress;
+    struct host * next;   
+}__host__;
+// Functions 
+void Ping(struct host);
+char * ReceiveReply();
+// Linked List functions
+void AddHost(__host__ **, __host__ *);
+__host__ *NewHost(char * ipAddress);
+void FreeHost(__host__ *);
+void FreeListHosts(__host__ *);
 
-#endif	/* network */
+/* 
+    Function and structs to create threads
+
+*/
+typedef struct t_Thread
+{   
+    __host__ *hostList;
+    pthread_t id;
+    int numOfHosts;
+    int pid;
+};
+void * ThreadRoutine(void *threadHandler);
+void CreateThread(__host__ *, int, int);
+void InitThreadPool();
+
+extern int hostsSize;
+extern __host__ * head;
+
+#endif	/* nmap */
