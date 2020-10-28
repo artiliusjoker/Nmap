@@ -76,7 +76,7 @@ void CreateThread(thread *,__host__ *, int, int);
 */
 struct icmp * InitPingPacket();
 void Ping(__host__ *, struct icmp *);
-void ReceiveReply(int sockFd, struct sockaddr_in *);
+void ReceiveReply(int sockFd, __host__ *);
 unsigned short checkSum(unsigned short *, int);
 
 // Global variables
