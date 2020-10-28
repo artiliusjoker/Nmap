@@ -1,5 +1,4 @@
 #include "../include/nmap.h"
-int hostsSize;
 
 // Converts /XX (char*) to network byte order in uint32_t
 uint32_t SubnetMaskToUint32_t(char * subnetMask){
@@ -15,7 +14,7 @@ uint32_t SubnetMaskToUint32_t(char * subnetMask){
 
 // Tham khao
 // https://stackoverflow.com/questions/41316678/finding-host-address-range-in-c
-char **GetAdressPool(uint32_t ipAddress, uint32_t subnetMask)
+void GetAdressPool(uint32_t ipAddress, uint32_t subnetMask)
 {
     // Get number of 1 bits base on Subnet mask
     int numbits = 0;
@@ -61,5 +60,4 @@ char **GetAdressPool(uint32_t ipAddress, uint32_t subnetMask)
         ++ hostCount;
     }
     hostsSize = hostCount;
-    return NULL;
 }

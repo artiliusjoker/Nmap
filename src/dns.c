@@ -18,8 +18,8 @@ struct sockaddr_in *DnsLookUp(char * hostName, char **resultIpAddress){
     }
     // Copy result from host entity
     socketAddrIn->sin_family = hostEntity->h_addrtype; 
-    socketAddrIn->sin_port = htons (PORT_NO); 
-    socketAddrIn->sin_addr.s_addr  = *(long*)hostEntity->h_addr;
+    socketAddrIn->sin_port = htons (0); 
+    socketAddrIn->sin_addr.s_addr  = *(uint32_t*)hostEntity->h_addr;
     // Option to get IP address in char*
     if(resultIpAddress != NULL)
     {

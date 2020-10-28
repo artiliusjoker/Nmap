@@ -1,8 +1,5 @@
 #include "../include/nmap.h"
 
-// void Ping(struct host){
-
-// }
 void AddHost(__host__ ** head, __host__ * newHost){
     __host__ *tempHost;
 
@@ -70,8 +67,4 @@ void FreeListHosts(__host__ * head){
 		FreeHost(tempHost);
 		tempHost = NULL;
 	}
-}
-
-char * ReceiveReply(){
-
 }

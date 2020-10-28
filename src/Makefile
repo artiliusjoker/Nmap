@@ -5,7 +5,7 @@ OBJDIR = objects
 CC = gcc
 PROGS = 1712695
 # Flag I
-CFLAGS = -I$(INDIR)
+CFLAGS = -I$(INDIR) -pthread
 # .h files location
 DEPS_LOC = $(wildcard $(INDIR)/*.h)
 # .C files
