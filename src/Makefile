@@ -20,11 +20,10 @@ $(OBJDIR)/%.o: %.c $(DEPS_LOC)
 
 $(PROGS): $(OBJ_LOC)
 	$(CC) -o $@ $^ $(CFLAGS)
+	rm -f  1712695.txt
 	
 .PHONY: clean
 all: $(PROGS)
 
 clean:
-	rm -f $(OBJDIR)/%.o $(PROGS)
-
-	
+	rm -f $(OBJ_LOC) $(PROGS)
