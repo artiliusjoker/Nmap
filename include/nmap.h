@@ -67,8 +67,13 @@ void FreeListHosts(__host__ *);
     Function to create threads
 
 */
-void * ThreadRoutine(void *threadHandler);
-void CreateThread(thread *,__host__ *, int, int);
+typedef struct thread_routing_args
+{
+    __host__ *hostList;
+    int numOfHosts;
+}thread_tra;
+void * ThreadRoutine(void *);
+void CreateThread(thread **,__host__ *, int, int);
 
 /* 
     Function to create ICMP packet, send and receive messages

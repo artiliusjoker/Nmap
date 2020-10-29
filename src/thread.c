@@ -1,24 +1,38 @@
 #include "../include/nmap.h"
 
-void *ThreadRoutine(void *hosts)
+void *ThreadRoutine(void *args)
 {
+    thread_tra *arguments = (thread_tra *)args;
     // Do its work
-    struct icmp *newPacket = InitPingPacket();
-    Ping((__host__ *)hosts, newPacket);
+    __host__ *temp = arguments->hostList;
+    for (size_t i = 0; i < arguments->numOfHosts; ++i)
+    {
+        if(temp == NULL)
+        {
+            free(arguments);
+            return NULL;
+        }
+        struct icmp *newPacket = InitPingPacket();
+        Ping(temp, newPacket);
+        temp = temp->next;
+    }
     return NULL;
 }
 
-void CreateThread(thread *list, __host__ *hosts, int pid, int hostsNum)
+void CreateThread(thread **list, __host__ *hosts, int pid, int hostsNum)
 {
-    list[pid].hostList = hosts;
-    list[pid].numOfHosts = hostsNum;
-    list[pid].pid = pid;
-
-    if (pthread_create(&(list[pid].id), NULL, ThreadRoutine, hosts) == 0)
+    (*list)[pid].hostList = hosts;
+    (*list)[pid].numOfHosts = hostsNum;
+    (*list)[pid].pid = pid;
+    thread_tra *arguments = (thread_tra *)malloc(sizeof(thread_tra));
+    arguments->hostList = hosts;
+    arguments->numOfHosts = hostsNum;
+    if (pthread_create(&((*list)[pid].id), NULL, ThreadRoutine, arguments) == 0)
     {
+        // Thread executing
     }
     else
     {
-        printf("Error: Unable to create sniffer thread\n");
+        fprintf(stdout, "Unable to create thread : %i", pid);
     }
 }

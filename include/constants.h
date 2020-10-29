@@ -9,7 +9,7 @@
 #define ICMP_PKT_RCV_SIZE 2048
   
 // Time to wait for reply
-#define RECEIVE_TIMEOUT 64  
+#define RECEIVE_TIMEOUT 1  
   
 // Type of address
 #define NETWORK_ADDR 1

@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
     int div = hostsSize / MAX_THREAD_POOL_SIZE;
     int remainder = hostsSize % MAX_THREAD_POOL_SIZE;
     // Begin pinging
-    __host__ *temp = head;
-    thread *listThreads = NULL;
+    __host__ *temp = head;      // Head of linked list
+    thread *listThreads = NULL; // Thread array
     // If div = 0 use less port
     if (div == 0)
     {
@@ -46,25 +46,52 @@ int main(int argc, char *argv[])
             if (temp == NULL)
                 break;
             listThreads[i].threadTotal = hostsSize;
-            CreateThread(listThreads, temp, i, 1);
+            CreateThread(&listThreads, temp, i, 1);
             temp = temp->next;
         }
     }
     // else one thread will handle more than one socket
     else
     {
+        int i = 0;
+        int r = 0;
+        int threadIndex = 0;
+        int hostsPerThread;
+        listThreads = calloc(MAX_THREAD_POOL_SIZE, sizeof(thread));
+
+        while (threadIndex < MAX_THREAD_POOL_SIZE)
+        {
+            r = hostsSize - i;
+            hostsPerThread = r > div  ? (div + 1): div;
+            listThreads[threadIndex].threadTotal = MAX_THREAD_POOL_SIZE;
+            CreateThread(&listThreads, temp, threadIndex, hostsPerThread);
+            i += hostsPerThread;
+            ++threadIndex;
+            for (size_t j = 0; j < hostsPerThread; ++j)
+            {
+                if (temp == NULL)
+                    break;
+                temp = temp->next;
+            }
+            if (temp == NULL)
+                break;
+        }
     }
     // Join threads
-    for (size_t i = 0; i < hostsSize; ++i)
+    for (size_t i = 0; i < listThreads[0].threadTotal; ++i)
     {
         int s = pthread_join(listThreads[i].id, NULL);
         if (s == 0)
         {
             fprintf(stdout, "Thread : %i done \n", i);
         }
+        else if (s != 0)
+        {
+            // Cannot join thread
+        }
     }
+    // End program, cleaning garbage
     free(listThreads);
-    // End program
     pthread_mutex_destroy(&lock);
     FreeListHosts(head);
     FreeString(inputAddress);
