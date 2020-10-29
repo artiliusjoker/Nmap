@@ -37,7 +37,6 @@ typedef struct t_Thread
     pthread_t id;
     int numOfHosts;
     int pid;
-    int threadTotal; // Total number of threads
 }thread;
 
 // Other functions

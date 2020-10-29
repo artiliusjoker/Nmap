@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
     // Begin pinging
     __host__ *temp = head;      // Head of linked list
     thread *listThreads = NULL; // Thread array
+    int numOfThreads = 0;
     // If div = 0 use less port
     if (div == 0)
     {
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
         {
             if (temp == NULL)
                 break;
-            listThreads[i].threadTotal = hostsSize;
+            numOfThreads = hostsSize;
             CreateThread(&listThreads, temp, i, 1);
             temp = temp->next;
         }
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
         {
             r = hostsSize - i;
             hostsPerThread = r > div  ? (div + 1): div;
-            listThreads[threadIndex].threadTotal = MAX_THREAD_POOL_SIZE;
+            numOfThreads = MAX_THREAD_POOL_SIZE;
             CreateThread(&listThreads, temp, threadIndex, hostsPerThread);
             i += hostsPerThread;
             ++threadIndex;
@@ -78,7 +79,7 @@ int main(int argc, char *argv[])
         }
     }
     // Join threads
-    for (size_t i = 0; i < listThreads[0].threadTotal; ++i)
+    for (size_t i = 0; i < numOfThreads; ++i)
     {
         int s = pthread_join(listThreads[i].id, NULL);
         if (s == 0)
