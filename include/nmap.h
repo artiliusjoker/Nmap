@@ -83,6 +83,11 @@ void Ping(__host__ *, struct icmp *);
 void ReceiveReply(int sockFd, __host__ *);
 unsigned short checkSum(unsigned short *, int);
 
+/* 
+    Function to write to file
+*/
+void WriteResultsToFile(char *);
+
 // Global variables
 extern int hostsSize;
 extern __host__ * head;

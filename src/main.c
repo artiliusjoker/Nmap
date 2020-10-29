@@ -100,3 +100,19 @@ int main(int argc, char *argv[])
     free(sockAddr_in);
     return 1;
 }
+
+void WriteResultsToFile(char * result)
+{
+     // creating file pointer to work with files
+    FILE *fp;
+
+    // opening file in writing mode
+    fp = fopen("1712695.txt", "a");
+
+    if (fp == NULL) {
+        perror("Error in opening file !");
+        return;
+    }
+    fprintf(fp, "%s \n", result);
+    fclose(fp);
+}

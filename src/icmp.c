@@ -86,10 +86,12 @@ void ReceiveReply(int sockFd, __host__ *hostSended)
         messageSize = recvfrom(sockFd, receiveBuffer, ICMP_PKT_RCV_SIZE, 0, &source, &addressLength);
         if (messageSize > 0)
         {
-            // Check ip correct respond
+            // Check ip correct respond, then write to file
             if (source.sin_addr.s_addr == sourceAddress->sin_addr.s_addr)
             {
-                fprintf(stdout, "%s \n", inet_ntoa(source.sin_addr));
+                char *result = (char *)malloc(sizeof(inet_ntoa(source.sin_addr)));
+                strcpy(result, inet_ntoa(source.sin_addr));
+                WriteResultsToFile(result);
                 break;
             }
             clock_gettime(CLOCK_MONOTONIC, &time_end);
