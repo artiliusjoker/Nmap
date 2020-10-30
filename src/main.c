@@ -11,6 +11,8 @@ pthread_mutex_t lock;
 // Current pid
 pid_t currentPid;
 
+int numHostsFound = 0;
+
 // Driver code
 int main(int argc, char *argv[])
 {
@@ -19,15 +21,18 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Enter 2 arguments only. \"StudentID Network/inputSubnetMask\"\n");
         exit(0);
     }
+    // Timer
+    struct timespec time_start, time_end;
+    long timeExecuted;
+
     currentPid = getpid() & 0xffff;
     char *inputAddress = GetInfoFromStr(argv[1], NETWORK_ADDR);
     char *inputSubnetMask = GetInfoFromStr(argv[1], SUBNET_MASK);
-    char *resolved;
-    struct sockaddr_in *sockAddr_in;
+    struct sockaddr_in *inputNetworkAddress;
 
-    sockAddr_in = DnsLookUp(inputAddress, &resolved);
+    inputNetworkAddress = GetAddressInfo(inputAddress);
 
-    uint32_t networkLong = htonl(sockAddr_in->sin_addr.s_addr);
+    uint32_t networkLong = htonl(inputNetworkAddress->sin_addr.s_addr);
     uint32_t netmaskLong = SubnetMaskToUint32_t(inputSubnetMask);
     // Create list of hosts in a network to scan
     GetAdressPool(networkLong, netmaskLong);
@@ -35,6 +40,7 @@ int main(int argc, char *argv[])
     int div = hostsSize / MAX_THREAD_POOL_SIZE;
     int remainder = hostsSize % MAX_THREAD_POOL_SIZE;
     // Begin pinging
+    clock_gettime(CLOCK_MONOTONIC, &time_start);
     __host__ *temp = head;      // Head of linked list
     thread *listThreads = NULL; // Thread array
     int numOfThreads = 0;
@@ -84,23 +90,29 @@ int main(int argc, char *argv[])
         int s = pthread_join(listThreads[i].id, NULL);
         if (s == 0)
         {
-            fprintf(stdout, "Thread : %i done \n", i);
+            // Joined
         }
         else if (s != 0)
         {
             // Cannot join thread
         }
     }
+    clock_gettime(CLOCK_MONOTONIC, &time_end);
+    timeExecuted = time_end.tv_sec - time_start.tv_sec;
+
+    fprintf(stdout, "Nmap done : %i IP addresses (%i hosts up) scanned in %i seconds\n", hostsSize, numHostsFound, timeExecuted);
     // End program, cleaning garbage
+    // Free list threads
     free(listThreads);
     pthread_mutex_destroy(&lock);
     FreeListHosts(head);
     FreeString(inputAddress);
     FreeString(inputSubnetMask);
-    free(sockAddr_in);
+    free(inputNetworkAddress);
     return 1;
 }
-
+// Utilities
+// Def function to write to file
 void WriteResultsToFile(char * result)
 {
      // creating file pointer to work with files
@@ -115,4 +127,25 @@ void WriteResultsToFile(char * result)
     }
     fprintf(fp, "%s \n", result);
     fclose(fp);
+}
+// References
+// https://www.geeksforgeeks.org/ping-in-c/
+// Get address from hostname
+struct sockaddr_in *GetAddressInfo(char * hostName){
+    // Initialize
+    struct sockaddr_in *socketAddrIn = NULL;
+    socketAddrIn = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+    memset(socketAddrIn, 0, sizeof(struct sockaddr_in));
+
+    struct hostent *hostEntity; 
+    
+    if ((hostEntity = gethostbyname(hostName)) == NULL) 
+    { 
+        perror("Error in DNS lookup !");
+        exit(EXIT_FAILURE);
+    }
+    // Copy result from host entity
+    socketAddrIn->sin_family = hostEntity->h_addrtype; 
+    socketAddrIn->sin_addr.s_addr  = *(uint32_t*)hostEntity->h_addr;
+    return socketAddrIn;
 }

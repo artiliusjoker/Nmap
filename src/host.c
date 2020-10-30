@@ -26,7 +26,7 @@ __host__ *NewHost(char * ipAddress){
         perror("Unable to malloc new host");
         return NULL;
     }
-    tempSockAddr = DnsLookUp(ipAddress, NULL);
+    tempSockAddr = GetAddressInfo(ipAddress);
     if(tempSockAddr == NULL){
         perror("Unable to malloc new host (creating sockaddr_in)");
         return NULL;
@@ -54,14 +54,17 @@ void FreeListHosts(__host__ * head){
 
 	if (!head)
 		return;
-
+	
+	// Head
 	tempHost = head;
+	// Traverse the list to free
 	while (tempHost->next)
 	{
 		next = tempHost->next;
 		FreeHost(tempHost);
 		tempHost = next;
 	}
+	// Free last element
 	if (tempHost)
 	{
 		FreeHost(tempHost);

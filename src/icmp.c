@@ -91,7 +91,14 @@ void ReceiveReply(int sockFd, __host__ *hostSended)
             {
                 char *result = (char *)malloc(sizeof(inet_ntoa(source.sin_addr)));
                 strcpy(result, inet_ntoa(source.sin_addr));
+                // Lock to avoid race condition
+                pthread_mutex_lock(&lock);
+                // Actions in lock
+                ++ numHostsFound;
+                fprintf(stdout, "Host : %s is up \n", result);
                 WriteResultsToFile(result);
+                // Unlock
+                pthread_mutex_unlock(&lock);
                 break;
             }
             clock_gettime(CLOCK_MONOTONIC, &time_end);

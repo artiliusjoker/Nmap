@@ -12,8 +12,6 @@ uint32_t SubnetMaskToUint32_t(char * subnetMask){
     return result;
 }
 
-// Tham khao
-// https://stackoverflow.com/questions/41316678/finding-host-address-range-in-c
 void GetAdressPool(uint32_t ipAddress, uint32_t subnetMask)
 {
     // Get number of 1 bits base on Subnet mask
@@ -28,7 +26,7 @@ void GetAdressPool(uint32_t ipAddress, uint32_t subnetMask)
     }
 
     // Start host and end host
-    // Exclude broadcast and gateway host ?
+    // Exclude broadcast address
     unsigned long hoststart;
     unsigned long hostend;
     hoststart = 1;

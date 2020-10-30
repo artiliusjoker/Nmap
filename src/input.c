@@ -1,8 +1,4 @@
-#include "../include/mystring.h"
-
-boolean IsAddress(char *inputString){
-    return False;
-}
+#include "../include/nmap.h"
 
 char *GetInfoFromStr(char *inputString, int option){
     char *result;
