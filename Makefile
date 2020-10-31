@@ -1,17 +1,18 @@
 #Directory
-INDIR = ../include
+INDIR = include
 OBJDIR = objects
+SRCDIR = src
 # Constants
 CC = gcc
 PROGS = 1712695
 # Flag I
-CFLAGS = -I$(INDIR) -pthread
+CFLAGS = -pthread
 # .h files location
 DEPS_LOC = $(wildcard $(INDIR)/*.h)
 # .C files
-src = $(wildcard *.c)
+source = $(wildcard $(SRCDIR)/*.c)
 # Objects files and location
-obj = $(src:.c=.o)
+obj = $(source:.c=.o)
 OBJ_LOC = $(patsubst %,$(OBJDIR)/%,$(obj))
 
 # Rules
@@ -27,3 +28,4 @@ all: $(PROGS)
 
 clean:
 	rm -f $(OBJ_LOC) $(PROGS)
+

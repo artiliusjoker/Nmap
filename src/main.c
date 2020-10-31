@@ -24,16 +24,18 @@ int main(int argc, char *argv[])
     // Timer
     struct timespec time_start, time_end;
     long timeExecuted;
-
+    // Pid id 16 bit
     currentPid = getpid() & 0xffff;
+    // Tokenize the input into NetAddr and Subnet mask
     char *inputAddress = GetInfoFromStr(argv[1], NETWORK_ADDR);
     char *inputSubnetMask = GetInfoFromStr(argv[1], SUBNET_MASK);
     struct sockaddr_in *inputNetworkAddress;
-
+    // char * to sockaddr_in
     inputNetworkAddress = GetAddressInfo(inputAddress);
-
+    // Change to unit32_t
     uint32_t networkLong = htonl(inputNetworkAddress->sin_addr.s_addr);
     uint32_t netmaskLong = SubnetMaskToUint32_t(inputSubnetMask);
+
     // Create list of hosts in a network to scan
     GetAdressPool(networkLong, netmaskLong);
     // Calculate how many thread to be used
@@ -44,7 +46,7 @@ int main(int argc, char *argv[])
     __host__ *temp = head;      // Head of linked list
     thread *listThreads = NULL; // Thread array
     int numOfThreads = 0;
-    // If div = 0 use less port
+    // If div = 0 use less threads
     if (div == 0)
     {
         listThreads = calloc(hostsSize, sizeof(thread));
@@ -127,6 +129,7 @@ void WriteResultsToFile(char * result)
     }
     fprintf(fp, "%s \n", result);
     fclose(fp);
+    FreeString(result);
 }
 // References
 // https://www.geeksforgeeks.org/ping-in-c/
