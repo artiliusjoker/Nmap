@@ -33,6 +33,7 @@ __host__ *NewHost(char * ipAddress){
     }
     newHost->hostAddress = tempSockAddr;
     newHost->next = NULL;
+	strcpy(newHost->addressString, ipAddress);
     return newHost;
 }
 

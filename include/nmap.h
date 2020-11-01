@@ -27,6 +27,7 @@
 typedef struct host
 {
     struct sockaddr_in *hostAddress;
+    char addressString[IPV4_ADDR_SIZE];
     struct host *next;
 } __host__;
 // Each thread is stored in a struct
