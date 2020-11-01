@@ -5,8 +5,8 @@ SRCDIR = src
 # Constants
 CC = gcc
 PROGS = 1712695
-# Flag I
-CFLAGS = -pthread
+# Library
+CFLAGS = -pthread -lpcap
 # .h files location
 DEPS_LOC = $(wildcard $(INDIR)/*.h)
 # .C files
