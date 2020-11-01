@@ -2,9 +2,11 @@
 #ifndef constants
 #define constants
 
-// Define the Packet Constants 
+// Define the Packet Constants
+#define TCP_ACK_80 10
+#define TCP_SYN_443 11
 // icmp max packet size to send in bytes
-#define ICMP_PKT_SIZE 64
+#define ICMP_PKT_SIZE 20
 // icmp max packet size to receive in bytes
 #define ICMP_PKT_RCV_SIZE 2048
   

@@ -104,7 +104,11 @@ void ReceiveReply(int sockFd, __host__ *hostSended)
             clock_gettime(CLOCK_MONOTONIC, &time_end);
             seconds = time_end.tv_sec - time_start.tv_sec;
             if(seconds >= RECEIVE_TIMEOUT)
+            {
+                // Timeout             
                 break;
+            }
         }
     }
+    close(sockFd);
 }
