@@ -96,9 +96,7 @@ unsigned short checkSum(unsigned short *, int);
 /* 
     Functions related to Packets
 */
-void CreatePacket(char *, struct sockaddr_in *, struct sockaddr_in *, int);
-void SendPacket(char *, struct sockaddr_in *, struct sockaddr_in *, int);
-void SniffPacket();
+size_t CreatePacket(char *, struct sockaddr_in *, struct sockaddr_in *, int);
 
 typedef struct psuedo_tcp
 {

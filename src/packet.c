@@ -77,41 +77,44 @@ static struct tcphdr *CreateTCPhdr(int type, int srcPort, int desPort,struct soc
     return newTCPhdr;
 }
 
-void CreatePacket(char *buffer, struct sockaddr_in *source, struct sockaddr_in *des, int type)
+size_t CreatePacket(char *buffer, struct sockaddr_in *source, struct sockaddr_in *des, int type)
 {
+    size_t packetSize = 0;
     struct ip *ip = (struct ip *)buffer;
     // Same IP header for all types
     ip->ip_src = source->sin_addr;
     ip->ip_dst = des->sin_addr;
     ip->ip_v = 4;
-    ip->ip_hl = sizeof(struct ip) >> 2;
+    ip->ip_hl = 5;
     ip->ip_tos = 0;
     ip->ip_id = htons(currentPid);
     ip->ip_ttl = 64;
-    ip->ip_sum = 0; /* calculate later */
+    ip->ip_sum = 0;
 
     int protocolLength = 0;
     if (type == ICMP_TIMESTAMP || type == ICMP_ECHO)
     {
         struct icmp *icmp = (struct icmp *)(ip + 1);
         struct icmp *newPacket = CreateICMP(type);
-        protocolLength = sizeof(newPacket);
+        protocolLength = ICMP_PKT_SIZE;
         memcpy(icmp, newPacket, protocolLength);
         ip->ip_p = IPPROTO_ICMP;
         free(newPacket);
     }
     else if (type == TCP_ACK_80 || type == TCP_SYN_443)
     {
-        return;
+        return packetSize;
         ip->ip_p = IPPROTO_TCP;
-        struct tcphdr *tcpHeader = (struct iphdr *)(ip + 1);
+        struct tcphdr *tcpHeader = (struct tcphdr *)(ip + 1);
         //struct tcph * newTcpHeader = CreateTCPhdr();
     }
     else
     {
         fprintf(stderr, "ERR: unknown packet type\n");
-        return;
+        return packetSize;
     }
     ip->ip_len = sizeof(struct ip) + protocolLength;
     ip->ip_sum = checkSum((unsigned short *)ip, ip->ip_len);
+    packetSize = ip->ip_len;
+    return packetSize;
 }
