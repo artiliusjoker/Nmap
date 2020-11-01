@@ -13,12 +13,21 @@ pid_t currentPid;
 
 int numHostsFound = 0;
 
+pcap_if_t * defaultInterface = NULL;
+
 // Driver code
 int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
         fprintf(stderr, "Enter 2 arguments only. \"StudentID Network/inputSubnetMask\"\n");
+        exit(0);
+    }
+    // Get interface to capture
+    defaultInterface = GetInterface();
+    if(defaultInterface == NULL)
+    {
+        fprintf(stderr, "No interface to be captured !");
         exit(0);
     }
     // Timer
@@ -35,7 +44,6 @@ int main(int argc, char *argv[])
     // Change to unit32_t
     uint32_t networkLong = htonl(inputNetworkAddress->sin_addr.s_addr);
     uint32_t netmaskLong = SubnetMaskToUint32_t(inputSubnetMask);
-
     // Create list of hosts in a network to scan
     GetAdressPool(networkLong, netmaskLong);
     // Calculate how many thread to be used
@@ -43,7 +51,7 @@ int main(int argc, char *argv[])
     int remainder = hostsSize % MAX_THREAD_POOL_SIZE;
     // Begin pinging
     clock_gettime(CLOCK_MONOTONIC, &time_start);
-    __host__ *temp = head;      // Head of linked list
+    __host__ *temp = head;      // Head of linked list of hosts list
     thread *listThreads = NULL; // Thread array
     int numOfThreads = 0;
     // If div = 0 use less threads
@@ -111,7 +119,8 @@ int main(int argc, char *argv[])
     FreeString(inputAddress);
     FreeString(inputSubnetMask);
     free(inputNetworkAddress);
-    return 1;
+    pcap_freealldevs(defaultInterface);
+    return EXIT_SUCCESS;
 }
 // Utilities
 // Def function to write to file
@@ -151,4 +160,15 @@ struct sockaddr_in *GetAddressInfo(char * hostName){
     socketAddrIn->sin_family = hostEntity->h_addrtype; 
     socketAddrIn->sin_addr.s_addr  = *(uint32_t*)hostEntity->h_addr;
     return socketAddrIn;
+}
+pcap_if_t *GetInterface(){
+    pcap_if_t *defaultInterface = NULL;
+    char errbuf[PCAP_ERRBUF_SIZE];
+
+    if(pcap_findalldevs(&defaultInterface,errbuf) != 0)
+    {
+        perror("Cannot find any device to capture incoming packets !");
+        return (NULL);
+    }
+    return defaultInterface;
 }
