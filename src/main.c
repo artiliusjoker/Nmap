@@ -141,7 +141,6 @@ void WriteResultsToFile(char *result)
     }
     fprintf(fp, "%s \n", result);
     fclose(fp);
-    FreeString(result);
 }
 // References
 // https://www.geeksforgeeks.org/ping-in-c/

@@ -1,4 +1,19 @@
 #include "../include/nmap.h"
+
+// Struct to receive ARP reply
+struct ether_arp
+{
+    unsigned short arp_hrd;
+    unsigned short arp_pro;
+    unsigned char arp_hln;
+    unsigned char arp_pln;
+    unsigned short arp_op;
+    unsigned char arp_sha[6];
+    unsigned char arp_spa[4];
+    unsigned char arp_tha[6];
+    unsigned char arp_tpa[4];
+};
+
 void ScanArp(__host__ *host)
 {
     // Create packet
@@ -49,62 +64,45 @@ void ScanArp(__host__ *host)
     }
 
     // Receive packets
-
-    // int i, sd, status;
-    // uint8_t *ether_frame;
-    // arp_hdr *arphdr;
-
-    // // Allocate memory for various arrays.
-    // ether_frame = allocate_ustrmem(IP_MAXPACKET);
-
-    // // Listen for incoming ethernet frame from socket sd.
-    // // We expect an ARP ethernet frame of the form:
-    // //     MAC (6 bytes) + MAC (6 bytes) + ethernet type (2 bytes)
-    // //     + ethernet data (ARP header) (28 bytes)
-    // // Keep at it until we get an ARP reply.
-    // arphdr = (arp_hdr *)(ether_frame + 6 + 6 + 2);
-    // while (((((ether_frame[12]) << 8) + ether_frame[13]) != ETH_P_ARP) || (ntohs(arphdr->opcode) != ARPOP_REPLY))
-    // {
-    //     if ((status = recv(sd, ether_frame, IP_MAXPACKET, 0)) < 0)
-    //     {
-    //         if (errno == EINTR)
-    //         {
-    //             memset(ether_frame, 0, IP_MAXPACKET * sizeof(uint8_t));
-    //             continue; // Something weird happened, but let's try again.
-    //         }
-    //         else
-    //         {
-    //             perror("recv() failed:");
-    //             exit(EXIT_FAILURE);
-    //         }
-    //     }
-    // }
-
-    struct sockaddr_in *sourceAddress = host->hostAddress;
-    ssize_t messageSize;
-
-    char receiveBuffer[ICMP_PKT_RCV_SIZE];
-
-    // Timeout
+    // Timeout option
     struct timeval tv;
     tv.tv_sec = RECEIVE_TIMEOUT;
     tv.tv_usec = 0;
     setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof tv);
 
+    // Buffer
+    ssize_t messageSize;
+    char *receiveBuffer = (char *)malloc(ICMP_PKT_RCV_SIZE);
+    memset(receiveBuffer, 0, ICMP_PKT_RCV_SIZE);
+    struct ether_arp *arp_frame;
+    arp_frame = (struct ether_arp *)(receiveBuffer + 14); // Skip ethernet
+
     messageSize = recv(fd, receiveBuffer, ICMP_PKT_RCV_SIZE, 0);
-    //messageSize = recvfrom(fd, receiveBuffer, ICMP_PKT_RCV_SIZE, 0, &source, &addressLength);
     if (messageSize > 0)
     {
-        char *result = (char *)malloc(IPV4_ADDR_SIZE);
-        strcpy(result, inet_ntoa(source.sin_addr));
-        // Lock to avoid race condition
-        pthread_mutex_lock(&lock);
-        // Actions in lock
-        ++numHostsFound;
-        fprintf(stdout, "Host : %s is up \n", result);
-        WriteResultsToFile(result);
-        // Unlock
-        pthread_mutex_unlock(&lock);
+        if ((ntohs(arp_frame->arp_op) == ARPOP_REPLY))
+        {
+            char ipFrom[IPV4_ADDR_SIZE];
+            snprintf(ipFrom, sizeof(ipFrom), "%d.%d.%d.%d", arp_frame->arp_spa[0],
+                     arp_frame->arp_spa[1],
+                     arp_frame->arp_spa[2],
+                     arp_frame->arp_spa[3]);
+            char hostSended[IPV4_ADDR_SIZE];
+            strcpy(hostSended, inet_ntoa(host->hostAddress->sin_addr));
+            int compare = strcmp(ipFrom, hostSended);
+            if (compare == 0)
+            {
+                // Lock to avoid race condition
+                // Actions in lock
+                pthread_mutex_lock(&lock);
+                ++numHostsFound;
+                fprintf(stdout, "Host : %s is up \n", ipFrom);
+                WriteResultsToFile(ipFrom);
+                // Unlock
+                pthread_mutex_unlock(&lock);
+            }
+        }
     }
+    free(receiveBuffer);
     close(fd);
 }
