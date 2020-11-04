@@ -1,5 +1,6 @@
 #include "../include/nmap.h"
 
+static struct ifreq *FindInterface();
 // List of hosts to check
 __host__ *head = NULL;
 // Size of above list
@@ -13,14 +14,24 @@ pid_t currentPid;
 
 int numHostsFound = 0;
 
+// Interface
+struct ifreq *intReq = NULL;
+
 // Driver code
 int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
         fprintf(stderr, "Enter 2 arguments only. \"StudentID Network/inputSubnetMask\"\n");
-        exit(0);
+        exit(EXIT_FAILURE);
     }
+    else if (getuid() && geteuid())
+    {
+        printf("You don't have superuser privileges !!!\n");
+        exit(EXIT_FAILURE);
+    }
+    // Find interface
+    intReq = FindInterface();
     // Timer
     struct timespec time_start, time_end;
     long timeExecuted;
@@ -71,7 +82,7 @@ int main(int argc, char *argv[])
         while (threadIndex < MAX_THREAD_POOL_SIZE)
         {
             r = hostsSize - i;
-            hostsPerThread = r > div  ? (div + 1): div;
+            hostsPerThread = r > div ? (div + 1) : div;
             numOfThreads = MAX_THREAD_POOL_SIZE;
             CreateThread(&listThreads, temp, threadIndex, hostsPerThread);
             i += hostsPerThread;
@@ -104,26 +115,27 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "Nmap done : %i IP addresses (%i hosts up) scanned in %i seconds\n", hostsSize, numHostsFound, timeExecuted);
     // End program, cleaning garbage
-    // Free list threads
-    free(listThreads);
     pthread_mutex_destroy(&lock);
     FreeListHosts(head);
+    free(listThreads);
+    free(inputNetworkAddress);
+    free(intReq);
     FreeString(inputAddress);
     FreeString(inputSubnetMask);
-    free(inputNetworkAddress);
     return 1;
 }
 // Utilities
 // Def function to write to file
-void WriteResultsToFile(char * result)
+void WriteResultsToFile(char *result)
 {
-     // creating file pointer to work with files
+    // creating file pointer to work with files
     FILE *fp;
 
     // opening file in writing mode
     fp = fopen("1712695.txt", "a");
 
-    if (fp == NULL) {
+    if (fp == NULL)
+    {
         perror("Error in opening file !");
         return;
     }
@@ -134,21 +146,61 @@ void WriteResultsToFile(char * result)
 // References
 // https://www.geeksforgeeks.org/ping-in-c/
 // Get address from hostname
-struct sockaddr_in *GetAddressInfo(char * hostName){
+struct sockaddr_in *GetAddressInfo(char *hostName)
+{
     // Initialize
     struct sockaddr_in *socketAddrIn = NULL;
     socketAddrIn = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
     memset(socketAddrIn, 0, sizeof(struct sockaddr_in));
 
-    struct hostent *hostEntity; 
-    
-    if ((hostEntity = gethostbyname(hostName)) == NULL) 
-    { 
+    struct hostent *hostEntity;
+
+    if ((hostEntity = gethostbyname(hostName)) == NULL)
+    {
         perror("Error in DNS lookup !");
         exit(EXIT_FAILURE);
     }
     // Copy result from host entity
-    socketAddrIn->sin_family = hostEntity->h_addrtype; 
-    socketAddrIn->sin_addr.s_addr  = *(uint32_t*)hostEntity->h_addr;
+    socketAddrIn->sin_family = hostEntity->h_addrtype;
+    socketAddrIn->sin_addr.s_addr = *(uint32_t *)hostEntity->h_addr;
     return socketAddrIn;
+}
+struct ifreq *GetInterface()
+{
+    return intReq;
+}
+static struct ifreq *FindInterface()
+{
+    int if_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (if_fd < 0)
+    {
+        perror("Unable to open socket to find interface !");
+        exit(1);
+    }
+    struct ifreq intReq;
+    memset (&intReq, 0, sizeof (intReq));
+    // Interface name
+    snprintf (intReq.ifr_name, sizeof (intReq.ifr_name), "%s", "eth0");
+    // PA address
+    if (ioctl(if_fd, SIOCGIFADDR, &intReq) < 0)
+    {
+        perror("Cannot get PA address of interface");
+        exit(1);
+    }
+    // get index
+    if (ioctl(if_fd, SIOCGIFINDEX, &intReq) < 0)
+    {
+        perror("Cannot get index of interface");
+        exit(1);
+    }
+    // get MAC address
+    if (ioctl(if_fd, SIOCGIFHWADDR, &intReq) < 0)
+    {
+        perror("Cannot get hardware address !!!");
+        exit(1);
+    }
+    struct ifreq *result = (struct ifreq *)malloc(sizeof(struct ifreq));
+    memcpy(result, &intReq, sizeof(intReq));
+    close(if_fd);
+    return result;
 }

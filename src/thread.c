@@ -12,8 +12,7 @@ void *ThreadRoutine(void *args)
             free(arguments);
             return NULL;
         }
-        struct icmp *newPacket = InitPingPacket();
-        Ping(temp, newPacket);
+        ScanArp(temp);
         temp = temp->next;
     }
     return NULL;

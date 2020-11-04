@@ -18,6 +18,10 @@
 #include <linux/if_ether.h>
 #include <sys/types.h> 
 #include <sys/socket.h> 
+#include <sys/ioctl.h>
+#include <net/ethernet.h>
+#include <net/if_arp.h>
+#include <net/if.h>
 
 #include "constants.h"
 // Structs
@@ -35,7 +39,22 @@ typedef struct t_Thread
     int numOfHosts;
     int pid;
 }thread;
+// ARP packet
+struct __arp_packet
+{
+	struct ether_header ether;
+	struct arphdr arp; 
 
+	uint8_t  sender_mac[ETH_ALEN];
+	uint32_t sender_ip;
+	uint8_t  target_mac[ETH_ALEN];
+	uint32_t target_ip;
+
+	uint8_t  padding[18];
+} __attribute__ ((__packed__));
+typedef struct __arp_packet arp_packet;
+// Scan hosts
+void ScanArp(__host__ *host);
 // Other functions
 // Get address info in sockaddr_in from host name
 struct sockaddr_in *GetAddressInfo(char *);
@@ -76,27 +95,23 @@ void CreateThread(thread **,__host__ *, int, int);
 
 /* 
     Functions to create ICMP packet, send and receive messages
-
+    Use to implement ping
 */
 struct icmp * InitPingPacket();
 void Ping(__host__ *, struct icmp *);
 void ReceiveReply(int sockFd, __host__ *);
 unsigned short checkSum(unsigned short *, int);
 
-/* 
-    Function to write to file
-*/
+//Function to write to file
 void WriteResultsToFile(char *);
-
-/* 
-    Functions to get input and free allocated string
-*/
+//Functions to get input and free allocated string
 char *GetInfoFromStr(char *, int );
 // Free string
 void FreeString(char *);
+// Get default interface
+struct ifreq * GetInterface();
 
 // Global variables
-
 // Number of hosts to be scanned
 extern int hostsSize;
 // Head of Linked list of Hosts
