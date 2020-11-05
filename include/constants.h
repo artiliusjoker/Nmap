@@ -9,7 +9,7 @@
 #define ICMP_PKT_RCV_SIZE 2048
   
 // Time to wait for reply
-#define RECEIVE_TIMEOUT 1  
+#define RECEIVE_TIMEOUT 2
   
 // Type of address
 #define NETWORK_ADDR 1
@@ -18,7 +18,7 @@
 #define IPV4_ADDR_SIZE 16
 
 // Enum boolean implemented
-typedef enum { False, True } boolean; 
+typedef enum { False, True } boolean;
 
 // Max threads
 #define MAX_THREAD_POOL_SIZE 32

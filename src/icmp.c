@@ -78,19 +78,19 @@ void ReceiveReply(int sockFd, __host__ *hostSended)
     uint32_t seconds;
 
     // Receive packets
-    struct sockaddr_in source;
+    struct sockaddr_in *source = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
     int addressLength = sizeof(source);
     clock_gettime(CLOCK_MONOTONIC, &time_start);
     while (1)
     {
-        messageSize = recvfrom(sockFd, receiveBuffer, ICMP_PKT_RCV_SIZE, 0, &source, &addressLength);
+        messageSize = recvfrom(sockFd, receiveBuffer, ICMP_PKT_RCV_SIZE, 0, source, &addressLength);
         if (messageSize > 0)
         {
             // Check ip correct respond, then write to file
-            if (source.sin_addr.s_addr == sourceAddress->sin_addr.s_addr)
+            if (source->sin_addr.s_addr == sourceAddress->sin_addr.s_addr)
             {
-                char *result = (char *)malloc(sizeof(inet_ntoa(source.sin_addr)));
-                strcpy(result, inet_ntoa(source.sin_addr));
+                char *result = (char *)malloc(sizeof(inet_ntoa(source->sin_addr)));
+                strcpy(result, inet_ntoa(source->sin_addr));
                 // Lock to avoid race condition
                 pthread_mutex_lock(&lock);
                 // Actions in lock
@@ -107,4 +107,5 @@ void ReceiveReply(int sockFd, __host__ *hostSended)
                 break;
         }
     }
+    free(source);
 }
